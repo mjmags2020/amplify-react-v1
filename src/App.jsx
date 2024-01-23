@@ -1,28 +1,62 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Route, Routes } from 'react-router-dom';
 
-import SiteFooter from './components/common/SiteFooter'
+import { Amplify } from 'aws-amplify';
+import { Authenticator, View, Image, useTheme, Text } from '@aws-amplify/ui-react';
+import awsExports from './aws-exports';
+
+import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css'
+import '@aws-amplify/ui-react/styles.css';
+
 import SiteNav from './components/common/SiteNav';
+import SiteFooter from './components/common/SiteFooter';
 import HomePage from './components/home/HomePage';
-import LoginPage from './components/auth/LoginPage';
-import RegisterPage from './components/auth/RegisterPage';
+// import Contacts from './components/contacts/Contacts';
+
+Amplify.configure(awsExports);
 
 function App() {
+  const components = {
+    Header() {
+      const { tokens } = useTheme();
+
+      return (
+        <View textAlign="center" padding={tokens.space.large}>
+          <Image
+            alt="Contacts App"
+            src={"https://image.pitchbook.com/sJndlVyOyiKtJHvHKvbgydaCvKm1665739185905_200x200"}
+          />
+        </View>
+      );
+    },
+    Footer() {
+      const { tokens } = useTheme();
+
+      return (
+        <View textAlign="center" padding={tokens.space.large}>
+          <Text color={tokens.colors.neutral[80]}>
+            &copy; 2024 Ascendware
+          </Text>
+        </View>
+      );
+    },
+  };
 
   return (
-    <>
-      <header>
-        <SiteNav />
-        <Routes>
-          <Route path="*" element={<HomePage />} />
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage  />} />
-          <Route path="/register" element={<RegisterPage />} />
-        </Routes>
-        <SiteFooter />
-      </header>
-    </>
-  )
+    <Authenticator loginMechanisms={['email']} components={components}>
+      {({ signOut, user }) => (
+        <div>
+          <SiteNav logOut={signOut} />
+          <Routes>
+            <Route path='*' element={<HomePage />} />
+            <Route path='/' exact={true} element={<HomePage />} />
+            {/* <Route path='/contacts' element={<Contacts />} /> */}
+          </Routes>
+          <SiteFooter />
+        </div>
+      )}
+    </Authenticator>
+  );
 }
 
-export default App
+export default App;
